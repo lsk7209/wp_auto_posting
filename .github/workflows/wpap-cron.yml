@@ -1,0 +1,16 @@
+name: WP Auto-Pilot Cron
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  wpap-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger WP Auto-Pilot Cron
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.WPAP_TOKEN }}" \
+            https://YOUR_VERCEL_DOMAIN/api/cron/tick?secret=${{ secrets.CRON_SECRET }}

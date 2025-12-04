@@ -1,0 +1,10 @@
+[
+  {
+    "id": "site_1",
+    "label": "Main Blog",
+    "url": "https://example.com",
+    "username": "admin",
+    "app_password_b64": "Base64String",
+    "default_category_id": 3
+  }
+]
