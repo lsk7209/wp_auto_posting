@@ -2,7 +2,24 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs/promises';
 import path from 'path';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { db } from '@/db';
+import { settings } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+
+// Remove top-level client initialization
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+async function getGenAIClient() {
+    const keyRecord = await db.select().from(settings).where(eq(settings.key, 'gemini_api_key')).get();
+    const apiKey = keyRecord?.value || process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        throw new Error('Gemini API Key not found in settings or environment variables');
+    }
+
+    return new GoogleGenerativeAI(apiKey);
+}
+
 
 interface ModelConfig {
     id: string;
@@ -20,6 +37,7 @@ const MODELS_FILE_PATH = path.join(process.cwd(), 'data', 'models.json');
 
 export async function generate_post_content(row_json: any, system_prompt: string, model_id: string) {
     try {
+        const genAI = await getGenAIClient();
         const model = genAI.getGenerativeModel({ model: model_id });
 
         const prompt = `

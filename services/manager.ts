@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { jobs, jobRows } from '@/db/schema';
+import { jobs, jobRows, sites } from '@/db/schema';
 import { eq, and, sql, inArray } from 'drizzle-orm';
 import * as aiService from './ai_service';
 import * as wpService from './wp_service';
@@ -7,12 +7,16 @@ import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-// Helper to read sites.json
+// Helper to read site config from DB
 async function getSiteConfig(siteId: string) {
-    const sitesPath = path.join(process.cwd(), 'data', 'sites.json');
-    const sitesRaw = await fs.readFile(sitesPath, 'utf-8');
-    const sites = JSON.parse(sitesRaw);
-    return sites.find((s: any) => s.id === siteId);
+    const site = await db.select().from(sites).where(eq(sites.id, siteId)).get();
+    if (!site) return null;
+
+    // Return in the format expected by wp_service
+    return {
+        ...site,
+        app_password_b64: Buffer.from(site.app_password).toString('base64') // Convert stored password to b64 if needed, or just use as is if wp_service expects raw
+    };
 }
 
 // Helper to read prompts.json

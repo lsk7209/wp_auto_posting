@@ -24,3 +24,21 @@ export const jobRows = sqliteTable('job_rows', {
     wp_media_id: integer('wp_media_id'),
     input_data: text('input_data'), // JSON string of the row data
 });
+
+export const settings = sqliteTable('settings', {
+    key: text('key').primaryKey(),
+    value: text('value').notNull(),
+    updated_at: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+export const sites = sqliteTable('sites', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    url: text('url').notNull(),
+    username: text('username').notNull(),
+    app_password: text('app_password').notNull(), // In a real app, encrypt this!
+    default_category_id: integer('default_category_id'),
+    created_at: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+

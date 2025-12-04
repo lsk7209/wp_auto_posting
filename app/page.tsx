@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Link from 'next/link';
 
 export default function Home() {
   const [sites, setSites] = useState<any[]>([]);
@@ -18,27 +19,19 @@ export default function Home() {
   const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
-    // Fetch initial data
     const fetchData = async () => {
       try {
-        // In a real app, we'd fetch sites and prompts from an API too, 
-        // but for now we might need to import them or fetch from a new API endpoint if we made one.
-        // Since we didn't make API for sites/prompts, let's assume we can fetch them or just hardcode for demo 
-        // OR we should have made API routes for them. 
-        // The PRD says "UI는 models.json 기준(SSOT)".
-        // Let's fetch models.
+        // Fetch sites
+        const sitesRes = await axios.get('/api/sites');
+        setSites(sitesRes.data);
+        if (sitesRes.data.length > 0) setSelectedSite(sitesRes.data[0].id);
+
+        // Fetch models
         const modelsRes = await axios.get('/api/models');
         setModels(modelsRes.data);
         if (modelsRes.data.text_models.length > 0) setSelectedTextModel(modelsRes.data.text_models[0].id);
         if (modelsRes.data.image_models.length > 0) setSelectedImageModel(modelsRes.data.image_models[0].id);
 
-        // Fetch sites/prompts (Mocking since no API created for them yet, or I should create them?)
-        // I'll just hardcode for now or fetch from a static file if possible.
-        // Actually, I can just import the JSON files if I was server side, but this is client.
-        // I'll add a simple API for sites/prompts or just mock it here.
-        setSites([{ id: 'site_1', label: 'Main Blog' }]);
-        setPrompts([{ id: 'default_blog', content: 'Default Blog Prompt' }]);
-        setSelectedSite('site_1');
         setSystemPrompt('Default Blog Prompt');
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -101,7 +94,13 @@ export default function Home() {
     <main className="flex min-h-screen flex-col md:flex-row bg-gray-900 text-white">
       {/* Left Panel */}
       <div className="w-full md:w-1/3 p-6 border-r border-gray-700 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6 text-blue-400">WP Auto-Pilot</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-blue-400">WP Auto-Pilot</h1>
+          <div className="space-x-2">
+            <Link href="/create" className="text-sm bg-green-600 hover:bg-green-500 px-3 py-1 rounded">New Project</Link>
+            <Link href="/settings" className="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">Settings</Link>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div>
@@ -112,7 +111,7 @@ export default function Home() {
               onChange={(e) => setSelectedSite(e.target.value)}
             >
               {sites.map((s: any) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
+                <option key={s.id} value={s.id}>{s.name || s.label} ({s.url})</option>
               ))}
             </select>
           </div>
