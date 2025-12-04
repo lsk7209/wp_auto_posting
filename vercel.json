@@ -1,8 +1,8 @@
 {
     "crons": [
         {
-            "path": "/api/cron/tick?secret=${CRON_SECRET}&limit=2",
-            "schedule": "* * * * *"
+            "path": "/api/cron/tick?secret=${CRON_SECRET}&limit=10",
+            "schedule": "0 0 * * *"
         }
     ]
 }
